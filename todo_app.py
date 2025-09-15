@@ -47,13 +47,14 @@ class TodoApp:
         except IOError as e:
             print(f"エラー: データの保存に失敗しました - {e}")
 
-    def add_todo(self, task: str) -> None: # inputされたtaskをもとにtodoディクショナリを作成、todosのリストに追加、save_todos
+    def add_todo(self, task, due_date_str) -> None: # inputされたtaskをもとにtodoディクショナリを作成、todosのリストに追加、save_todos
         todo = {
             "id": len(self.todos) + 1,
             "task": task,
             "completed": False,
-            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "deadline": due_date_str,
+            }
         self.todos.append(todo)
         self.save_todos()
         print(f"タスクを追加しました: {task}")
@@ -68,6 +69,7 @@ class TodoApp:
             status = "✓" if todo["completed"] else "○"
             print(f"{todo['id']:2d}. [{status}] {todo['task']}")
             print(f"    作成日: {todo['created_at']}")
+            print(f"    期限:　 {todo['deadline']}")
 
     def complete_todo(self, todo_id: int) -> None:# inputされたidを完了させsave_todos、及び例外処理
         todo = self.find_todo_by_id(todo_id)
@@ -93,6 +95,7 @@ class TodoApp:
             print(f"タスクを削除しました: {todo['task']}")
         else:
             print("指定されたIDのタスクが見つかりません。")
+
 
     def find_todo_by_id(self, todo_id: int) -> Optional[Dict]: # inputされたidが存在するかどうか判断する
         for todo in self.todos:
@@ -269,8 +272,15 @@ class TodoApp:
             
             elif choice == "2":
                 task = self.get_user_input("新しいタスクを入力してください: ")
+                due_date_str = input("タスクの期限を入力してください (例: 2025-09-20): ")
+                try:
+                    # 入力された文字列が正しい日付形式かチェック
+                    datetime.strptime(due_date_str, '%Y-%m-%d')
+                except ValueError:
+                    # 形式が違う場合はエラーメッセージを表示
+                    print("エラー: 日付は 'YYYY-MM-DD' の形式で入力してください。")
                 if task:
-                    self.add_todo(task)
+                    self.add_todo(task, due_date_str)
                 else:
                     print("タスク名が空です。")
             
