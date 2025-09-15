@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json # データを.json　のファイルで管理できる
 import os # ファイルが存在するかチェックするモジュール
-from datetime import datetime # 現在の日付を取得するモジュール
+from datetime import datetime, date # 現在の日付を取得するモジュール
 from typing import List, Dict, Optional # 今の型がどういう物なのかを提示するモジュール
 import tkinter as tk
 import tkinter.font as font
@@ -23,6 +23,8 @@ is_work_time = True
 remaining_time = WORK_MIN * 60
 timer_running = False
 timer_id = None
+
+APP_DATA_FILE = "app_data.json"
 
 class TodoApp:
     def __init__(self, data_file: str = "todos.json"): # data_file todosの初期設定およびload_todos関数の起動
@@ -128,6 +130,34 @@ class TodoApp:
             print("無効な入力です。数字を入力してください。")
             return None
         
+    def check_login_bonus(self):
+        """1日1回のログインボーナスをチェックし、メッセージを表示する"""
+        today_str = str(date.today())
+        app_data = {}
+        
+        # 最終ログイン日のデータを読み込む
+        try:
+            with open(APP_DATA_FILE, 'r', encoding='utf-8') as f:
+                app_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            app_data['last_login'] = ""
+
+        # 最終ログイン日が今日でなければ、ボーナスを表示
+        if app_data.get('last_login') != today_str:
+            print("\n✨ ログインボーナス！ ✨")
+            bonus = random.randint(1,5)
+            print(f"ゲットしたポイントは.....\n{bonus}ポイントです！")
+            stat_name = input("どのステータスに振りますか？\nHP,MP,こうげき,ぼうぎょ から選んで入力してください:")
+            modify_stat(stat_name, bonus)
+            
+            # 今日の日付を保存
+            app_data['last_login'] = today_str
+            with open(APP_DATA_FILE, 'w', encoding='utf-8') as f:
+                json.dump(app_data, f, indent=4)
+            print("------------------------")
+
+
+    # タイマーの関数 
     def update_display(self):
     # 残り時間を画面に表示する
         global is_work_time, remaining_time, root, status_label, timer_label
@@ -262,6 +292,7 @@ class TodoApp:
 
     def run(self) -> None: # 主要な機能の起動、全体の流れ show_menu起動後inputされた数字ごとにやることを分ける
         print("CUI Todo アプリへようこそ！")
+        self.check_login_bonus()
         
         while True:
             self.show_menu()
