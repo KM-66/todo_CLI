@@ -6,6 +6,8 @@ from typing import List, Dict, Optional # 今の型がどういう物なのか�
 import tkinter as tk
 import tkinter.font as font
 import threading
+from character_system import show_current_status, modify_stat
+import random
 
 
 # 変数の設定
@@ -77,6 +79,9 @@ class TodoApp:
                 todo["completed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.save_todos()
                 print(f"タスクを完了しました: {todo['task']}")
+                print("おめでとうございます！ 1ポイントゲット")
+                stat_name = input("どのステータスに振りますか？\nHP,MP,こうげき,ぼうぎょ から選んで入力してください:")
+                modify_stat(stat_name, 1)
         else:
             print("指定されたIDのタスクが見つかりません。")
 
@@ -102,7 +107,8 @@ class TodoApp:
         print("3. タスク完了")
         print("4. タスク削除")
         print("5. ポモドーロタイマー作成")
-        print("6. 終了")
+        print("6. ステータス表示")
+        print("7. 終了")
         print("=" * 20)
 
     def get_user_input(self, prompt: str) -> str: # inputの処理及び例外処理（str　タスクを入力する際）
@@ -256,7 +262,7 @@ class TodoApp:
         
         while True:
             self.show_menu()
-            choice = self.get_user_input("選択してください (1-6): ")
+            choice = self.get_user_input("選択してください (1-7): ")
             
             if choice == "1":
                 self.list_todos()
@@ -282,22 +288,26 @@ class TodoApp:
                     if todo_id is not None:
                         self.delete_todo(todo_id)
             
-            elif choice == '5':
-                print('タイマーを作成します。')
+            elif choice == "5":
+                print("タイマーを作成します。")
                 self.start_my_timer()
 
             elif choice == "6":
+                print("ステータスを表示します。")
+                show_current_status()
+
+            elif choice == "7":
                 print("アプリケーションを終了します。お疲れさまでした！")
                 break
             
             else:
-                print("無効な選択です。1-6の数字を入力してください。")
+                print("無効な選択です。1-7の数字を入力してください。")
             
             input("\nEnterキーを押して続行...")
 
 def main(): # app.runの起動
     app = TodoApp()
     app.run()
-    input("何かキーを押すとメインプログラムが終了します...")
+
 if __name__ == "__main__": # mainの例外処理　詳しくはわからない
     main()
